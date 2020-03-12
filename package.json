@@ -1,0 +1,13 @@
+{
+  "name": "expressapp",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.19.2",
+    "express": "^4.17.1",
+    "form-data": "^3.0.0",
+    "moment": "^2.24.0",
+    "underscore": "^1.9.2"
+  }
+}
