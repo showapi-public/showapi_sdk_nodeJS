@@ -1,44 +1,50 @@
+// 单例模式, 时间戳只能在request时传入,
+const fs = require('fs')
 
-var fs = require('fs');
+const SDK = require('./index')
+function createTimestamp () {
+  const date = new Date()
+  const yyyy = String(date.getFullYear())
+  const MM = String(date.getMonth() + 1).padStart(2, '0') // number
+  const DD = String(date.getDate()).padStart(2, '0')
+  const HH = String(date.getHours()).padStart(2, '0')
+  const mm = String(date.getMinutes()).padStart(2, '0')
+  const ss = String(date.getSeconds()).padStart(2, '0')
+  return yyyy + MM + DD + HH + mm + ss
+}
 
-  // 以二维码生成与识别接口为例 https://www.showapi.com/apiGateway/view/?apiCode=887&pointCode=2
+const instance = new SDK({
+  showapi_appid: '89752',
+  secret: '72af203412e44fa7a0aacbb4ab413671',
+  showapi_timestamp: createTimestamp()
+})
 
+// const instance = s
+const stream = fs.createReadStream('./static/xxx.png')
+console.log('createReadStream', Buffer.isBuffer(stream))
+const file = fs.readFileSync('./static/xxx.png')
+console.log('file', Buffer.isBuffer(file))
+const base64 = instance.filePathToBase64('./static/xxx.png')
 
-  // base64 代码示例
-  var instance = new SDK({
-    url: 'https://route.showapi.com/887-4',
-    showapi_appid: '',
-    secret: '',
-  })
+instance.request({
+  url: 'https://route.showapi.com/887-2',
+  method: 'post',
+  data: {
+    img: instance.markupFile(fs.readFileSync('./static/xxx.png'))
+  }
 
-  const file = fs.createReadStream('./static/xxx.png')
-  const base64 = instance.fileToBase64(file)
-  instance.addTextPara('imgData',base64)
-  instance.post()
-  .then(response =>{console.log('res', response.data)})
-  .catch(error => console.log('error', error))
-
-
-  // 普通文本 代码示例
-  var instance = new SDK({
-    url: 'https://route.showapi.com/887-1',
-    showapi_appid: '',
-    secret: '',
-    content:'我是内容'
-  })
-  instance.post()
-  .then(response =>{console.log('res', response.data)})
-  .catch(error => console.log('error', error))
-
-  // 文件上传 代码示例
-  var instance = new SDK({
-    url: 'https://route.showapi.com/887-2',
-    showapi_appid: '',
-    secret: '',
-
-  })
-  instance.addFilePara('img','./static/xxx.png')
-  instance.post()
-  .then(response =>{console.log('res', response.data)})
-  .catch(error => console.log('error', error))
-
+}).then(res => {
+  console.log('resData', res.status, JSON.stringify(res.data))
+  console.log('resConfig', res.status, res.config)
+}).catch(error => {
+  console.log(error)
+  if (error.response) {
+    console.log('Error-Staus', error.response.status)
+    // console.log('Error-Data', error.response.data)
+  } else if (error.request) {
+    console.log('error.request', error.request)
+  } else {
+    console.log('Error', error.message)
+  }
+  // console.log('ErrorConfig', error.config)
+})

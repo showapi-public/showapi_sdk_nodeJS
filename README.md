@@ -1,80 +1,75 @@
-> 注: 该nodejsSDK内部使用axios请求库,
->对于基本数据类型, 例如字符串(包括base64),可以在实例化时,通过option一次性传入, 也可以用addTextPara方法一个个传入;对于文件对象, 仅能使用>addFilePara传入
->对比jsSDK版本: 1, fileToBase64的使用略有区别; 2, nodejsSDK使用secret字段代替showapi_sign
+仅适用于调用showapi.com的接口!  基于axios, 所以实例的request方法 等同于axiox.request, [axios 文档地址](https://github.com/axios/axios#axiosrequestconfig)
+`每次调用request方法都需要重新实例化`
+ 
+### 安装
 
-## 使用方式
-```javascript
-const instance = new jsSDK(option)
-instance.post()
-  .then(response){console.log(response.data)}
-  .catch(err){console.log(err)}
+#### yarn
+
+```bash
+yarn add axios mime-types form-data
 ```
 
+#### npm
 
-## api
+```bash
+npm i axios mime-types form-data
+```
 
-### option
+### 使用方式
+```js
+require Showapi from 'showapi_sdk_nodeJS' // 暂时未发布该版本到npm, 请先引用文件夹下的index.js
 
-| 参数| 说明| 类型| 默认值 |
-|  -- | -- | -- | --|
-|showapi_appid| 应用id| string| ''
-|secret | 密钥| string | ''
-| url | ajax时调用的url地址 | string|''
-|...| 其他请求参数| any | -
+// 配置showapi_appid 和 secret, 位于 https://www.showapi.com/console#/myApp
+const instance = new Showapi({
+showapi_appid: '', // 必填
+secret: '', // 必填
+showapi_timestamp:'',// 非必填
+showapi_res_gzip:'' // 非必填
+})
+instance.request({
+  url:''
+}).then(()=>{})
+```
+
+### 兼容性
+本sdk使用了 ES6 Promises以及部分es6特性, 请确保你的环境支持它
+
+
+### playground
+因为每次调用request方法都需要重新调用 new Showapi(), 为方便管理, 您可以再次封装一下,比如:
+
+```js
+// showapiRequest.js
+const Showapi = require('showapi_sdk_nodeJS')
+
+const showapiRequest = function(){
+  const axios =  new Showapi({
+    showapi_appid: '', 
+    secret: '', 
+  })
+  return instance
+}
+module.exports = showapiRequest()
+
+// 调用时
+const showapiRequest = require('./../showapiRequest.js')
+showapiRequest.request({
+  url:'https://route.showapi.com/9-4',
+  method:'get',
+  params:{
+    ip:'113.78.19.201'
+  }
+}).then(res=> console.log(res))
+```
 
 
 ### 实例方法
 
 | 方法名 | 说明| 参数
 |  -- | -- | -- |
-| addTextPara | 向option对象中添加请求参数, | 参数名,参数值
-| addFilePara | 向option对象中添加文件类型的值, 文件上传只能通过调用addFilePara方法传入, 尝试在option中传入是无效的|参数名,参数值
-| fileToBase64 | 这是一个同步操作, 具体使用方式请查看demo, | path或fs.ReadStream对象
-| post | 发送post请求,返回Promise对象,  | 接受一个对象,用于axios,比如设置超时: post({timeout:2000})
+|  request | 发起http请求, 等同于axios的request方法 | 请查看axios文档
+| markupFile | 标记文件, 请求参数是文件时,请务必使用调用该方法,| file
+| filePathToBase64 | 工具函数,作用是将文件转为base64 | 文件路径
 
-## demo
-  
-  [以二维码生成与识别接口为例]( https://www.showapi.com/apiGateway/view/?apiCode=887&pointCode=2) 
-
- ```javascript
- // base64 代码示例
-  var fs = require('fs');
-  var instance = new SDK({
-    url: 'https://route.showapi.com/887-4',
-    showapi_appid: '',
-    secret: '',
-  })
-
-  const file = fs.createReadStream('./static/xxx.png')
-  const base64 = instance.fileToBase64(file)
-  instance.addTextPara('imgData',base64)
-  instance.post()
-  .then(response =>{console.log('res', response.data)})
-  .catch(error => console.log('error', error))
-
-
-  // 普通文本 代码示例
-  var instance = new SDK({
-    url: 'https://route.showapi.com/887-1',
-    showapi_appid: '',
-    secret: '',
-    content:'我是内容'
-  })
-  instance.post()
-  .then(response =>{console.log('res', response.data)})
-  .catch(error => console.log('error', error))
-
-  // 文件上传 代码示例
-  var instance = new SDK({
-    url: 'https://route.showapi.com/887-2',
-    showapi_appid: '',
-    secret: '',
-
-  })
-  instance.addFilePara('img','./static/xxx.png')
-  instance.post()
-  .then(response =>{console.log('res', response.data)})
-  .catch(error => console.log('error', error))
-   ```
 
 
