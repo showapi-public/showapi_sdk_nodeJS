@@ -14,8 +14,8 @@ function createTimestamp () {
 }
 
 const instance = new SDK({
-  showapi_appid: '89752',
-  secret: '72af203412e44fa7a0aacbb4ab413671',
+  showapi_appid: '',
+  secret: '',
   showapi_timestamp: createTimestamp()
 })
 
